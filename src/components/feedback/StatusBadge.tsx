@@ -34,6 +34,11 @@ const styleMap: Record<string, { bg: string; text: string; border: string; label
     border: colors.status.lost.border,
     label:  'Perdido',
   },
+  green:  { bg: '#DCFCE7', text: '#176640', border: '#3BD58B', label: '' },
+  yellow: { bg: '#FEF9C3', text: '#CA8A04', border: '#FDE047', label: '' },
+  red:    { bg: '#FEE2E2', text: '#DC2626', border: '#FCA5A5', label: '' },
+  blue:   { bg: '#DBEAFE', text: '#1D4ED8', border: '#93C5FD', label: '' },
+  gray:   { bg: '#F1F5F9', text: '#475569', border: '#CBD5E1', label: '' },
 };
 
 const fallbackStyle = {
