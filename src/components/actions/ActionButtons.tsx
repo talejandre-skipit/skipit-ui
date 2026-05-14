@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import EditOutlinedIcon  from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { colors } from '../../tokens/colors';
 
 export interface ActionButtonsProps {

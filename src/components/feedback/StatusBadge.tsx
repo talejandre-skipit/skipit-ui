@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Chip } from '@mui/material';
 import { colors } from '../../tokens/colors';
 

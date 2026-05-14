@@ -72,12 +72,16 @@ export const SkipitTheme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        root: { textTransform: 'none', fontWeight: 600, borderRadius: 8 },
-        containedPrimary: {
-          backgroundColor: colors.brand.mint,
-          color: colors.dark[900],
-          '&:hover': { backgroundColor: colors.brand.green2 },
-        },
+        root: ({ ownerState }) => ({
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: 8,
+          ...(ownerState.variant === 'contained' && ownerState.color === 'primary' && {
+            backgroundColor: colors.brand.mint,
+            color: colors.dark[900],
+            '&:hover': { backgroundColor: colors.brand.green2 },
+          }),
+        }),
       },
     },
     MuiChip: {

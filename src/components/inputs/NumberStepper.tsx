@@ -61,26 +61,28 @@ export function NumberStepper({
           disabled={disabled}
           error={error}
           size={size}
-          inputProps={{ min, max, step, style: { textAlign: 'right', fontWeight: 600 } }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end" sx={{ mr: -1 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <IconButton
-                    size="small" onClick={increment} disabled={!canIncrement} tabIndex={-1}
-                    sx={{ p: '1px', borderRadius: '2px 4px 0 0', color: canIncrement ? colors.text.secondary : colors.text.disabled, '&:hover': { color: colors.dark[900] } }}
-                  >
-                    <KeyboardArrowUpIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
-                  <IconButton
-                    size="small" onClick={decrement} disabled={!canDecrement} tabIndex={-1}
-                    sx={{ p: '1px', borderRadius: '0 0 4px 2px', color: canDecrement ? colors.text.secondary : colors.text.disabled, '&:hover': { color: colors.dark[900] } }}
-                  >
-                    <KeyboardArrowDownIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
-                </Box>
-              </InputAdornment>
-            ),
+          slotProps={{
+            htmlInput: { min, max, step, style: { textAlign: 'right', fontWeight: 600 } },
+            input: {
+              endAdornment: (
+                <InputAdornment position="end" sx={{ mr: -1 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <IconButton
+                      size="small" onClick={increment} disabled={!canIncrement} tabIndex={-1}
+                      sx={{ p: '1px', borderRadius: '2px 4px 0 0', color: canIncrement ? colors.text.secondary : colors.text.disabled, '&:hover': { color: colors.dark[900] } }}
+                    >
+                      <KeyboardArrowUpIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                    <IconButton
+                      size="small" onClick={decrement} disabled={!canDecrement} tabIndex={-1}
+                      sx={{ p: '1px', borderRadius: '0 0 4px 2px', color: canDecrement ? colors.text.secondary : colors.text.disabled, '&:hover': { color: colors.dark[900] } }}
+                    >
+                      <KeyboardArrowDownIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Box>
+                </InputAdornment>
+              ),
+            },
           }}
           sx={{
             width,

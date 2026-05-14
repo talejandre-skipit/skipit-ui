@@ -3,7 +3,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Skeleton, Tooltip, IconButton } from '@mui/material';
 import LockOutlinedIcon  from '@mui/icons-material/LockOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { colors } from '../../tokens/colors';
 
 export interface SimpleTableColumn<T = Record<string, unknown>> {

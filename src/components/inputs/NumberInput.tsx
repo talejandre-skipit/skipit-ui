@@ -56,18 +56,20 @@ export function NumberInput({
         error={error}
         size={size}
         fullWidth={fullWidth}
-        inputProps={{ min, max, step }}
-        InputProps={{
-          startAdornment: prefix ? (
-            <InputAdornment position="start">
-              <Box component="span" sx={{ color: colors.text.muted, fontWeight: 500, fontSize: '0.875rem' }}>{prefix}</Box>
-            </InputAdornment>
-          ) : undefined,
-          endAdornment: suffix ? (
-            <InputAdornment position="end">
-              <Box component="span" sx={{ color: colors.text.muted, fontWeight: 500, fontSize: '0.875rem' }}>{suffix}</Box>
-            </InputAdornment>
-          ) : undefined,
+        slotProps={{
+          htmlInput: { min, max, step },
+          input: {
+            startAdornment: prefix ? (
+              <InputAdornment position="start">
+                <Box component="span" sx={{ color: colors.text.muted, fontWeight: 500, fontSize: '0.875rem' }}>{prefix}</Box>
+              </InputAdornment>
+            ) : undefined,
+            endAdornment: suffix ? (
+              <InputAdornment position="end">
+                <Box component="span" sx={{ color: colors.text.muted, fontWeight: 500, fontSize: '0.875rem' }}>{suffix}</Box>
+              </InputAdornment>
+            ) : undefined,
+          },
         }}
         sx={{
           width: fullWidth ? '100%' : width,
