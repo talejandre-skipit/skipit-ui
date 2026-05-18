@@ -18,9 +18,9 @@ Librería de componentes compartidos de Skipit. Se consume como dependencia loca
 ## Componentes disponibles
 
 ### Tablas
-- **`DataTable`** — columnas ordenables. Usar cuando se necesita sort.
-- **`SimpleTable`** — sin orden. Usar para listas estáticas.
-- NUNCA crear tablas con `<table>` HTML crudo.
+SIEMPRE usar DataTable. Todas las tablas tienen sort en todas las columnas.
+SimpleTable NO se usa — está deprecada.
+Todas las columnas van con sortable: true salvo columnas de acciones.
 
 ### Inputs numéricos
 - **`NumberStepper`** — el usuario sube/baja con flechas (ej: cantidades).
