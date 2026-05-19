@@ -3,14 +3,10 @@ export interface DataTableColumn<T = Record<string, unknown>> {
     key: keyof T | string;
     label: string;
     sortable?: boolean;
-    /** Renders a filter input below the header label */
-    filterable?: boolean;
-    /** Dot-path used for filtering when key points to an object (e.g. "comercial.nombre") */
-    filterKey?: string;
-    /** Shows a drag handle on the right border to resize this column */
     resizable?: boolean;
     align?: 'left' | 'center' | 'right';
     width?: number | string;
+    minWidth?: number;
     format?: 'currency' | 'date' | 'none';
     render?: (value: unknown, row: T) => React.ReactNode;
 }

@@ -3,25 +3,21 @@
 import React, { useState, useMemo, useRef } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, TableSortLabel, Box, Skeleton,
+  Paper, TableSortLabel, Box, Skeleton, Tooltip,
 } from '@mui/material';
 import { ActionButtons } from '../actions/ActionButtons';
 import { colors } from '../../tokens/colors';
 
 export interface DataTableColumn<T = Record<string, unknown>> {
-  key:         keyof T | string;
-  label:       string;
-  sortable?:   boolean;
-  /** Renders a filter input below the header label */
-  filterable?: boolean;
-  /** Dot-path used for filtering when key points to an object (e.g. "comercial.nombre") */
-  filterKey?:  string;
-  /** Shows a drag handle on the right border to resize this column */
-  resizable?:  boolean;
-  align?:      'left' | 'center' | 'right';
-  width?:      number | string;
-  format?:     'currency' | 'date' | 'none';
-  render?:     (value: unknown, row: T) => React.ReactNode;
+  key:        keyof T | string;
+  label:      string;
+  sortable?:  boolean;
+  resizable?: boolean;
+  align?:     'left' | 'center' | 'right';
+  width?:     number | string;
+  minWidth?:  number;
+  format?:    'currency' | 'date' | 'none';
+  render?:    (value: unknown, row: T) => React.ReactNode;
 }
 
 export interface DataTableProps<T extends Record<string, unknown> = Record<string, unknown>> {
@@ -61,24 +57,22 @@ export function DataTable<T extends Record<string, unknown>>({
 
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [filters, setFilters] = useState<Record<string, string>>({});
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
   const resizeRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
 
-  const hasActions  = Boolean(onEdit || onDelete);
-  const hasFilters  = columns.some(c => c.filterable);
-  const hasResizable = columns.some(c => c.resizable !== false);
+  const hasActions = Boolean(onEdit || onDelete);
 
   function startResize(e: React.MouseEvent, col: DataTableColumn<T>) {
     e.preventDefault();
     const key = String(col.key);
-    const currentWidth = colWidths[key] ?? (typeof col.width === 'number' ? col.width : 100);
+    const cell = (e.currentTarget as HTMLElement).closest('th') as HTMLElement | null;
+    const currentWidth = colWidths[key] ?? (cell ? cell.getBoundingClientRect().width : (typeof col.width === 'number' ? col.width : 100));
     resizeRef.current = { key, startX: e.clientX, startWidth: currentWidth };
 
     const onMove = (ev: MouseEvent) => {
       if (!resizeRef.current) return;
       const { key: k, startX, startWidth } = resizeRef.current;
-      setColWidths(prev => ({ ...prev, [k]: Math.max(40, startWidth + (ev.clientX - startX)) }));
+      setColWidths(prev => ({ ...prev, [k]: Math.max(50, startWidth + (ev.clientX - startX)) }));
     };
     const onUp = () => {
       resizeRef.current = null;
@@ -94,21 +88,9 @@ export function DataTable<T extends Record<string, unknown>>({
     else { setSortKey(key); setSortDir('asc'); }
   }
 
-  const filteredData = useMemo(() => {
-    const active = Object.entries(filters).filter(([, v]) => v.trim() !== '');
-    if (active.length === 0) return data;
-    return data.filter(row =>
-      active.every(([colKey, val]) => {
-        const col = columns.find(c => String(c.key) === colKey);
-        const path = col?.filterKey ?? colKey;
-        return String(getValue(row, path) ?? '').toLowerCase().includes(val.toLowerCase());
-      })
-    );
-  }, [data, filters, columns]);
-
   const sortedData = useMemo(() => {
-    if (!sortKey) return filteredData;
-    return [...filteredData].sort((a, b) => {
+    if (!sortKey) return data;
+    return [...data].sort((a, b) => {
       const av = getValue(a, sortKey);
       const bv = getValue(b, sortKey);
       if (av == null) return 1;
@@ -116,14 +98,14 @@ export function DataTable<T extends Record<string, unknown>>({
       const cmp = av < bv ? -1 : av > bv ? 1 : 0;
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [filteredData, sortKey, sortDir]);
+  }, [data, sortKey, sortDir]);
 
   function renderCell(col: DataTableColumn<T>, row: T): React.ReactNode {
     const raw = getValue(row, String(col.key));
     if (col.render) return col.render(raw, row);
     switch (col.format) {
       case 'currency': return (
-        <Box component="span" sx={{ color: colors.danger.main, fontWeight: 600 }}>
+        <Box component="span" sx={{ color: colors.danger.main, fontWeight: 600, fontFamily: 'monospace' }}>
           {formatCurrency(raw)}
         </Box>
       );
@@ -132,10 +114,34 @@ export function DataTable<T extends Record<string, unknown>>({
     }
   }
 
-  function getWidth(col: DataTableColumn<T>): number | string | undefined {
-    const key = String(col.key);
-    return colWidths[key] ?? col.width;
-  }
+  const headerSx = {
+    fontSize: '0.6875rem',
+    fontWeight: 700,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase' as const,
+    color: colors.text.secondary,
+    whiteSpace: 'nowrap' as const,
+    overflow: 'visible',
+    lineHeight: 1.3,
+  };
+
+  const sortLabelSx = {
+    ...headerSx,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '2px',
+    '& .MuiTableSortLabel-icon': {
+      opacity: 0.3,
+      marginLeft: '2px',
+      marginRight: 0,
+      flexShrink: 0,
+      fontSize: '0.85rem',
+    },
+    '&.Mui-active': { color: colors.text.secondary },
+    '&.Mui-active .MuiTableSortLabel-icon': { opacity: 1, color: colors.brand.mint },
+    '&:hover': { color: colors.text.secondary },
+    '&:hover .MuiTableSortLabel-icon': { opacity: 0.7 },
+  };
 
   return (
     <TableContainer
@@ -145,82 +151,47 @@ export function DataTable<T extends Record<string, unknown>>({
         width: '100%',
         overflowX: 'auto',
         border: `1px solid ${colors.border.default}`,
-        borderRadius: '12px',
+        borderRadius: '10px',
       }}
     >
       <Table
         size="small"
-        sx={{ tableLayout: 'fixed', width: '100%', minWidth: 0 }}
+        sx={{ tableLayout: 'auto', width: '100%' }}
       >
         <TableHead>
           <TableRow sx={{ bgcolor: '#f7f9fc' }}>
             {columns.map(col => {
-              const w = getWidth(col);
-              const isResizable = col.resizable !== false && hasResizable;
+              const key = String(col.key);
+              const w = colWidths[key] ?? col.width;
+              const isResizable = col.resizable === true;
               return (
                 <TableCell
-                  key={String(col.key)}
+                  key={key}
                   align={col.align ?? 'left'}
                   sx={{
                     width: w,
+                    minWidth: col.minWidth,
                     position: 'relative',
-                    verticalAlign: 'top',
-                    overflow: 'hidden',
-                    py: hasFilters ? 0.75 : undefined,
+                    px: 1.5,
+                    py: 1.25,
+                    borderBottom: `1px solid ${colors.border.default}`,
+                    userSelect: isResizable ? 'none' : undefined,
                   }}
                 >
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {col.sortable !== false ? (
-                      <TableSortLabel
-                        active={sortKey === String(col.key)}
-                        direction={sortKey === String(col.key) ? sortDir : 'asc'}
-                        onClick={() => handleSort(String(col.key))}
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          whiteSpace: 'nowrap',
-                          '& .MuiTableSortLabel-icon': {
-                            opacity: 0.35,
-                            marginLeft: '2px',
-                            marginRight: 0,
-                            flexShrink: 0,
-                          },
-                          '&.Mui-active .MuiTableSortLabel-icon': { opacity: 1 },
-                        }}
-                      >
-                        {col.label}
-                      </TableSortLabel>
-                    ) : (
-                      <Box
-                        component="span"
-                        sx={{ whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: 600, color: colors.text.secondary, textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                      >
-                        {col.label}
-                      </Box>
-                    )}
-
-                    {col.filterable && (
-                      <input
-                        value={filters[String(col.key)] ?? ''}
-                        onChange={e => setFilters(prev => ({ ...prev, [String(col.key)]: e.target.value }))}
-                        placeholder="Filtrar…"
-                        onClick={e => e.stopPropagation()}
-                        style={{
-                          width: '100%',
-                          padding: '2px 6px',
-                          fontSize: '11px',
-                          border: `1px solid ${colors.border.default}`,
-                          borderRadius: 4,
-                          outline: 'none',
-                          background: '#fff',
-                          boxSizing: 'border-box',
-                          fontFamily: 'inherit',
-                        }}
-                        onFocus={e => { e.target.style.borderColor = colors.border.focus; }}
-                        onBlur={e => { e.target.style.borderColor = colors.border.default; }}
-                      />
-                    )}
-                  </Box>
+                  {col.sortable !== false ? (
+                    <TableSortLabel
+                      active={sortKey === key}
+                      direction={sortKey === key ? sortDir : 'asc'}
+                      onClick={() => handleSort(key)}
+                      sx={sortLabelSx}
+                    >
+                      {col.label}
+                    </TableSortLabel>
+                  ) : (
+                    <Box component="span" sx={headerSx}>
+                      {col.label}
+                    </Box>
+                  )}
 
                   {isResizable && (
                     <Box
@@ -228,20 +199,31 @@ export function DataTable<T extends Record<string, unknown>>({
                       sx={{
                         position: 'absolute',
                         right: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: 4,
+                        top: '20%',
+                        bottom: '20%',
+                        width: 3,
                         cursor: 'col-resize',
                         zIndex: 1,
-                        '&:hover': { bgcolor: colors.brand.mint, opacity: 0.5 },
-                        userSelect: 'none',
+                        borderRadius: 2,
+                        transition: 'background 0.15s',
+                        '&:hover': { bgcolor: colors.brand.mint },
                       }}
                     />
                   )}
                 </TableCell>
               );
             })}
-            {hasActions && <TableCell align="right" sx={{ width: 80 }} />}
+            {hasActions && (
+              <TableCell
+                align="right"
+                sx={{
+                  width: 80,
+                  px: 1.5,
+                  py: 1.25,
+                  borderBottom: `1px solid ${colors.border.default}`,
+                }}
+              />
+            )}
           </TableRow>
         </TableHead>
 
@@ -250,11 +232,15 @@ export function DataTable<T extends Record<string, unknown>>({
             Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
                 {columns.map(col => (
-                  <TableCell key={String(col.key)}>
+                  <TableCell key={String(col.key)} sx={{ px: 1.5, py: 1 }}>
                     <Skeleton variant="text" width="80%" />
                   </TableCell>
                 ))}
-                {hasActions && <TableCell><Skeleton variant="text" width={60} /></TableCell>}
+                {hasActions && (
+                  <TableCell sx={{ px: 1.5, py: 1 }}>
+                    <Skeleton variant="text" width={60} />
+                  </TableCell>
+                )}
               </TableRow>
             ))
           ) : sortedData.length === 0 ? (
@@ -262,7 +248,7 @@ export function DataTable<T extends Record<string, unknown>>({
               <TableCell
                 colSpan={columns.length + (hasActions ? 1 : 0)}
                 align="center"
-                sx={{ py: 4, color: colors.text.muted }}
+                sx={{ py: 5, color: colors.text.muted, fontSize: '0.875rem' }}
               >
                 {emptyMessage}
               </TableCell>
@@ -272,18 +258,41 @@ export function DataTable<T extends Record<string, unknown>>({
               <TableRow
                 key={rowKey ? String(getValue(row, String(rowKey))) : i}
                 hover
+                sx={{
+                  '&:last-child td': { borderBottom: 0 },
+                  '&:hover': { bgcolor: '#f7f9fc' },
+                }}
               >
-                {columns.map(col => (
-                  <TableCell
-                    key={String(col.key)}
-                    align={col.align ?? 'left'}
-                    sx={{ overflow: 'hidden', maxWidth: 0 }}
-                  >
-                    {renderCell(col, row)}
-                  </TableCell>
-                ))}
+                {columns.map(col => {
+                  const content = renderCell(col, row);
+                  const isText = typeof content === 'string' || typeof content === 'number';
+                  return (
+                    <TableCell
+                      key={String(col.key)}
+                      align={col.align ?? 'left'}
+                      sx={{
+                        px: 1.5,
+                        py: 1,
+                        fontSize: '0.8125rem',
+                        color: colors.text.primary,
+                        maxWidth: col.width ? undefined : 220,
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {isText ? (
+                        <Tooltip title={String(content)} placement="top" disableHoverListener={String(content).length < 30}>
+                          <Box component="span" sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {content}
+                          </Box>
+                        </Tooltip>
+                      ) : content}
+                    </TableCell>
+                  );
+                })}
                 {hasActions && (
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ px: 1.5, py: 0.75, whiteSpace: 'nowrap' }}>
                     <ActionButtons
                       onEdit={onEdit ? () => onEdit(row) : undefined}
                       onDelete={onDelete ? () => onDelete(row) : undefined}
