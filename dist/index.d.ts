@@ -1,6 +1,7 @@
 export { DataTable } from './components/tables/DataTable';
 export { SimpleTable } from './components/tables/SimpleTable';
-export type { DataTableProps, DataTableColumn } from './components/tables/DataTable';
+export type { DataTableProps } from './components/tables/DataTable';
+export type { GridColDef as DataTableColumn, GridRenderCellParams } from './components/tables/DataTable';
 export type { SimpleTableProps, SimpleTableColumn } from './components/tables/SimpleTable';
 export { NumberStepper } from './components/inputs/NumberStepper';
 export { NumberInput } from './components/inputs/NumberInput';

@@ -1,23 +1,16 @@
-import React from 'react';
-export interface DataTableColumn<T = Record<string, unknown>> {
-    key: keyof T | string;
-    label: string;
-    sortable?: boolean;
-    resizable?: boolean;
-    align?: 'left' | 'center' | 'right';
-    width?: number | string;
-    minWidth?: number;
-    format?: 'currency' | 'date' | 'none';
-    render?: (value: unknown, row: T) => React.ReactNode;
-}
-export interface DataTableProps<T extends Record<string, unknown> = Record<string, unknown>> {
-    columns: DataTableColumn<T>[];
-    data: T[];
-    onEdit?: (row: T) => void;
-    onDelete?: (row: T) => void;
+import { type GridColDef, type GridRowModel, type GridRowId } from '@mui/x-data-grid';
+export type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+export interface DataTableProps {
+    rows: GridRowModel[];
+    columns: GridColDef[];
+    onEdit?: (row: GridRowModel) => void;
+    onDelete?: (row: GridRowModel) => void;
     deleteConfirmed?: boolean;
     loading?: boolean;
-    emptyMessage?: string;
-    rowKey?: keyof T | string;
+    pageSize?: number;
+    getRowId?: (row: GridRowModel) => GridRowId;
+    hideToolbar?: boolean;
+    hideFooter?: boolean;
+    autoHeight?: boolean;
 }
-export declare function DataTable<T extends Record<string, unknown>>({ columns, data, onEdit, onDelete, deleteConfirmed, loading, emptyMessage, rowKey, }: DataTableProps<T>): import("react/jsx-runtime").JSX.Element;
+export declare function DataTable({ rows, columns, onEdit, onDelete, deleteConfirmed, loading, pageSize, getRowId, hideToolbar, hideFooter, autoHeight, }: DataTableProps): import("react/jsx-runtime").JSX.Element;
