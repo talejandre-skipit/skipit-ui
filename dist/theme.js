@@ -80,5 +80,52 @@ export const SkipitTheme = createTheme({
                 root: { fontWeight: 600, fontSize: '0.75rem', borderRadius: 6, height: 26 },
             },
         },
+        // ── Colores de selección unificados: brand.dark (#176640) en TODA la app ──
+        // brand.mint (#61F8A9) NUNCA se usa para indicar estado seleccionado.
+        MuiAutocomplete: {
+            styleOverrides: {
+                option: {
+                    '&[aria-selected="true"]': {
+                        backgroundColor: 'rgba(23,102,64,0.08) !important',
+                        color: '#176640',
+                    },
+                    '&[aria-selected="true"].Mui-focused': {
+                        backgroundColor: 'rgba(23,102,64,0.14) !important',
+                    },
+                    '&.Mui-focused': {
+                        backgroundColor: 'rgba(23,102,64,0.06) !important',
+                    },
+                },
+            },
+        },
+        MuiMenuItem: {
+            styleOverrides: {
+                root: {
+                    '&.Mui-selected': {
+                        backgroundColor: 'rgba(23,102,64,0.08)',
+                        color: '#176640',
+                        '&:hover': { backgroundColor: 'rgba(23,102,64,0.12)' },
+                    },
+                },
+            },
+        },
+        MuiListItemButton: {
+            styleOverrides: {
+                root: {
+                    '&.Mui-selected': {
+                        backgroundColor: 'rgba(23,102,64,0.08)',
+                        color: '#176640',
+                        '&:hover': { backgroundColor: 'rgba(23,102,64,0.12)' },
+                    },
+                },
+            },
+        },
+        MuiTab: {
+            styleOverrides: {
+                root: {
+                    '&.Mui-selected': { color: '#176640' },
+                },
+            },
+        },
     },
 });
